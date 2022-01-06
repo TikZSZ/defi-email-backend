@@ -14,7 +14,7 @@ async function bootstrap() {
     exposedHeaders: 'set-cookie',
     origin:
       process.env.NODE_ENV === 'production'
-        ? 'https://defi-email-frontend.vercel.app'
+        ? 'https://dmaill.vercel.app'
         : 'http://localhost:3000',
   });
   app.useGlobalPipes(new ValidationPipe());
