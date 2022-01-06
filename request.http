@@ -1,0 +1,18 @@
+POST http://localhost:3000/auth/createUser HTTP/1.1
+Content-Type: application/json
+
+{
+  "data":{
+    "userAccountId":"0.0.1",
+    "name":"Aditya",
+    "public_key":"adscay213120d20ae2425ASf",
+    "country":"India",
+    "signature":"adscay213120d20ae2425ASf",
+    "sequence_no":1,
+    "timestamp":"0.5"
+  }
+}
+
+################################
+
+@Get http://
