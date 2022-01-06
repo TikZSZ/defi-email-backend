@@ -1,1 +1,5 @@
 node_modules
+prisma/migrations
+prisma/dev.db
+prisma/schema.prisma
+dist
