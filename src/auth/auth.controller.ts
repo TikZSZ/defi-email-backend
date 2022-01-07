@@ -1,5 +1,5 @@
 import { PublicKey ,PrivateKey} from '@hashgraph/sdk';
-import { BadRequestException, Body, Controller, Get, NotFoundException,Req, Param, Post ,Session, UnauthorizedException, ParseIntPipe} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, NotFoundException,Req, Param, Post ,Session, UnauthorizedException, ParseIntPipe, Query} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login.dto';
@@ -26,8 +26,6 @@ export class AuthController {
 
   @Post('/loginUser')
   async loginUser(@Body() body: LoginUserDto,@Req() req:any) {
-    console.log(body);
-    
     const foundUser = await this.authService.loginUser(body.data);
     const token = this.jwtService.sign(foundUser)
     req.session['user'] = token
@@ -53,10 +51,10 @@ export class AuthController {
     return this.authService.createTopic(body.data,user.userAccountId)
   }
 
-  @Get('/getTopics')
-  getTopics(){
-    return this.authService.getTopics()
-  }
+  // @Get('/getTopics')
+  // getTopics(){
+  //   return this.authService.getTopics()
+  // }
 
   @Get('/getTopicsByUser',)
   getTopicsByUser(@User() user:{userAccountId:string,name:string}|undefined){
@@ -64,9 +62,19 @@ export class AuthController {
     return this.authService.getTopicsByUser(user.userAccountId)
   }
 
-  @Get('/getTopics/:topicId')
-  getTopicsByTopicID(@Param('topicId') topicId:string){
-    return this.authService.getTopicsByTopicID(topicId)
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  @Get('/getTopics')
+  async getTopicsByTopicID(@Query('topicId') topicId:string,@Query('id',ParseIntPipe) id:number){
+    await this.sleep(1000)
+    return this.authService.getTopicsByTopicID(topicId !== ''?topicId:undefined,id)
+  }
+
+  @Get('/deleteTopic/:id')
+  deleteTopic(@User() user:{userAccountId:string,name:string}|undefined,@Param('id',ParseIntPipe) id:number){
+    if(!user.userAccountId) throw new UnauthorizedException()
+    return this.authService.deleteTopic(id,user.userAccountId)
   }
   
 }

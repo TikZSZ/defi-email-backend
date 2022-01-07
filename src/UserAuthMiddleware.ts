@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import {JwtService} from "@nestjs/jwt"
-import { request } from 'http';
+
 @Injectable()
 export class UserAuthMiddleware implements NestMiddleware {
   constructor(private jwtService:JwtService){}

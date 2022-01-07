@@ -9,13 +9,13 @@ import { Prisma } from '@prisma/client';
 const selectTopic = {
   topicId: true,
   topic_id: true,
-  user:{
-    select:{
-      public_key:true,
-      x25519_public_key:true
-    }
-  }
-}
+  user: {
+    select: {
+      public_key: true,
+      x25519_public_key: true,
+    },
+  },
+};
 
 @Injectable()
 export class AuthService {
@@ -29,8 +29,8 @@ export class AuthService {
       select: {
         name: true,
         userAccountId: true,
-        public_key:true,
-        x25519_public_key:true
+        public_key: true,
+        x25519_public_key: true,
       },
     });
   }
@@ -47,7 +47,7 @@ export class AuthService {
   }
 
   async loginUser(data: Prisma.UserWhereUniqueInput & { signature: string }) {
-    const { userAccountId, name, public_key, x25519_public_key,signature } =
+    const { userAccountId, name, public_key, x25519_public_key, signature } =
       await this.prisma.user.findUnique({
         where: {
           userAccountId: data.userAccountId,
@@ -63,13 +63,10 @@ export class AuthService {
     };
   }
 
-  createTopic(
-    data: Prisma.TopicCreateInput,
-    userAccountId: string,
-  ) {
+  createTopic(data: Prisma.TopicCreateInput, userAccountId: string) {
     return this.prisma.topic.create({
-      data: {...data,user:{connect:{userAccountId:userAccountId}}},
-      select:selectTopic
+      data: { ...data, user: { connect: { userAccountId: userAccountId } } },
+      select: selectTopic,
     });
   }
 
@@ -83,18 +80,56 @@ export class AuthService {
   getTopicsByUser(userAccountId: string) {
     return this.prisma.topic.findMany({
       orderBy: { topic_id: 'desc' },
-      select: {...selectTopic,topic_name:true,date_created:true,user:false},
+      select: {
+        ...selectTopic,
+        topic_name: true,
+        date_created: true,
+        user: false,
+      },
       where: { userAccountId },
     });
   }
 
-  getTopicsByTopicID(topicId: string) {
+  getTopicsByTopicID(topicId?: string, id?: number) {
     return this.prisma.topic.findMany({
       orderBy: { topic_id: 'desc' },
       select: selectTopic,
       where: {
-        topicId: { contains: topicId, startsWith: topicId.split('.')[0] },
+        AND: [
+          {
+            topicId: topicId && {
+              contains: topicId,
+              startsWith: topicId,
+            },
+          },
+          {
+            topic_id:  {
+              lt: id === 0?undefined:id,
+            },
+          },
+        ],
       },
+      take: 1,
     });
   }
+  async deleteTopic(id:number,userAccountId: string){
+    const topic = await this.prisma.topic.findUnique({
+      where:{
+        topic_id:id
+      },
+      select:{
+        userAccountId:true
+      }
+    })
+    if(topic.userAccountId !== userAccountId ) throw new UnauthorizedException()
+    return this.prisma.topic.delete({
+      where:{
+        topic_id:id
+      },
+      select:{
+        topic_id:true
+      }
+    })
+  } 
+  
 }
