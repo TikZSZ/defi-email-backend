@@ -84,7 +84,11 @@ export class AuthService {
         ...selectTopic,
         topic_name: true,
         date_created: true,
-        user: false,
+        user: {
+          select:{
+            x25519_public_key:true
+          }
+        },
       },
       where: { userAccountId },
     });
