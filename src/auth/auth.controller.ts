@@ -51,11 +51,6 @@ export class AuthController {
     return this.authService.createTopic(body.data,user.userAccountId)
   }
 
-  // @Get('/getTopics')
-  // getTopics(){
-  //   return this.authService.getTopics()
-  // }
-
   @Get('/getTopicsByUser',)
   getTopicsByUser(@User() user:{userAccountId:string,name:string}|undefined){
     if (!user) throw new UnauthorizedException()
@@ -67,7 +62,6 @@ export class AuthController {
   }
   @Get('/getTopics')
   async getTopicsByTopicID(@Query('topicId') topicId:string,@Query('id',ParseIntPipe) id:number){
-    await this.sleep(1000)
     return this.authService.getTopicsByTopicID(topicId !== ''?topicId:undefined,id)
   }
 
