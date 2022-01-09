@@ -47,13 +47,14 @@ export class AuthService {
   }
 
   async loginUser(data: Prisma.UserWhereUniqueInput & { signature: string }) {
-    const { userAccountId, name, public_key, x25519_public_key, signature } =
+    const user =
       await this.prisma.user.findUnique({
         where: {
           userAccountId: data.userAccountId,
         },
       });
-    if (!userAccountId) throw new NotFoundException();
+    if(!user) throw new NotFoundException();
+    const { userAccountId, name, public_key, x25519_public_key, signature } = user
     if (!(signature === data.signature)) throw new UnauthorizedException();
     return {
       userAccountId,
@@ -85,9 +86,9 @@ export class AuthService {
         topic_name: true,
         date_created: true,
         user: {
-          select:{
-            x25519_public_key:true
-          }
+          select: {
+            x25519_public_key: true,
+          },
         },
       },
       where: { userAccountId },
@@ -107,33 +108,34 @@ export class AuthService {
             },
           },
           {
-            topic_id:  {
-              lt: id === 0?undefined:id,
+            topic_id: {
+              lt: id === 0 ? undefined : id,
             },
           },
         ],
       },
-      take: 1,
+      take: 20,
     });
   }
-  async deleteTopic(id:number,userAccountId: string){
-    const topic = await this.prisma.topic.findUnique({
-      where:{
-        topic_id:id
-      },
-      select:{
-        userAccountId:true
-      }
-    })
-    if(topic.userAccountId !== userAccountId ) throw new UnauthorizedException()
-    return this.prisma.topic.delete({
-      where:{
-        topic_id:id
-      },
-      select:{
-        topic_id:true
-      }
-    })
-  } 
   
+  async deleteTopic(id: number, userAccountId: string) {
+    const topic = await this.prisma.topic.findUnique({
+      where: {
+        topic_id: id,
+      },
+      select: {
+        userAccountId: true,
+      },
+    });
+    if (topic.userAccountId !== userAccountId)
+      throw new UnauthorizedException();
+    return this.prisma.topic.delete({
+      where: {
+        topic_id: id,
+      },
+      select: {
+        topic_id: true,
+      },
+    });
+  }
 }
